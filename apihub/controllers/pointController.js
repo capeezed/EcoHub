@@ -1,20 +1,90 @@
+const PontoSustentavel = require('../models/point')
+
 const pointController = {
-    async getAllPoints(req, res) {
-        try {
-            const points = [
-                { id: 1, name: 'Ponto de Coleta de Eletrônicos Central', lat: -23.50, long: -47.45},
-                { id: 2, name: 'Feira Orgânica do Parque Campolim', lat: -23.52, lon: -47.46}
-            ]
-            return res.status(500).json(points);
+    async createPoint(req, res) {
+        try{
+            const { Nome, Descricao, Latitude, Longitude, Endereco, UsuarioID, CategoriaID } = req.body
+
+            const newPoint = await PontoSustentavel.create({
+                Nome,
+                Descricao,
+                Latitude,
+                Longitude,
+                Endereco,
+                UsuarioID,
+                CategoriaID
+            })
+
+            return res.status(201).json(newPoint);
         } catch (error) {
-            console.error(error);
-            return res.status(500).json({ Error: 'Erro interno do servidor.'});
+            console.error(error)
+            return res.status(500).json({ error: 'Erro ao criar o ponto sustentável.'})
         }
     },
 
-    async createPoint(req, res) {
-        return res.json({ message: 'Ponto criado com sucesso (simulação)'});
-    }
-};
+    async getAllPoints(req, res) {
+        try {
+            const points = await PontoSustentavel.findAll();
+            return res.status(200).json(points); 
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Erro ao buscar o ponto.'})
+        }
+    },
 
-module.exports = pointController;
+    async getPointById(req, res) {
+        try {
+            const { id } = req.params
+            const point = await PontoSustentavel.findByPk(id)
+
+            if (!point) {
+                return res.status(404).json({ error: 'Ponto não encontrado.' })
+            }
+
+            return res.status(200).json(point)
+        } catch (error) {
+            console.error(error)
+            return res.status(500).json({ error: 'Erro ao buscar o ponto'})
+        }
+    },
+
+    async updatePoint(req, res) {
+        try {
+            const { id } = req.params
+            const { Nome, Descricao, Endereco } = req.body
+
+            const point = await PontoSustentavel.findByPk(id)
+            if (!point) {
+                return res.status(404).json({ error: 'Ponto não encontrado.'})
+            }
+
+            point.Nome = Nome
+            point.Descricao = Descricao
+            point.Endereco = Endereco
+            await point.save()
+            return res.status(200).json(point)
+        } catch(error) {
+            console.error(error)
+            return res.status(500).json({ error: 'Erro ao atualizar o ponto.'})
+        }
+    },
+
+    async deletePoint(req, res) {
+        try{
+            const { id } = req.params
+            const point = await PontoSustentavel.findByPk(id)
+
+            if (!point) {
+                return res.status(404).json({ error: 'Ponto não encontrado.'})
+            }
+
+            await point.destroy()
+            return res.status(204).send()
+        } catch (error) {
+            console.error(error)
+            return res.status(500).jjson({ error: 'Erro ao deletar o ponto'})
+        }
+    }
+}
+
+module.exports = pointController
