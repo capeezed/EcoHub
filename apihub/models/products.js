@@ -14,14 +14,18 @@ const Produtos = sequelize.define('Produtos', {
         field: 'Titulo'
     },
     Descricao: {
-        type: DataTypes.STRING(500),
-        allowNull: true,
+        type: DataTypes.TEXT,
         field: 'Descricao'
     },
     Status: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        field: 'Status'
+        defaultValue: 'Disponível',
+        field: 'Status',
+        validade: {
+            isIn: [['Disponível', 'Reservado', 'Concluído']]
+        }
+
     },
     DonoUsuarioID: {
         type: DataTypes.INTEGER,
@@ -32,12 +36,13 @@ const Produtos = sequelize.define('Produtos', {
         type: DataTypes.INTEGER,
         allowNull: false,
         field: 'CategoriaID'
-    },
-    DataCriacao: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        field: 'DataCriacao'
     }
-})
-
+},
+{
+    tableName: 'Produtos',
+    timestamps: false,
+    createdAt: 'DataCriacao',
+    updateAt: false
+}
+)
 module.exports = Produtos
